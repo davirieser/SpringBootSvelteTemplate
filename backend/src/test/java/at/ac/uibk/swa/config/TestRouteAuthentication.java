@@ -1,13 +1,16 @@
 package at.ac.uibk.swa.config;
 
 import at.ac.uibk.swa.config.jwt_authentication.JwtToken;
+import at.ac.uibk.swa.models.Authenticable;
 import at.ac.uibk.swa.models.Permission;
 import at.ac.uibk.swa.models.Person;
+import at.ac.uibk.swa.repositories.PersonRepository;
 import at.ac.uibk.swa.service.PersonService;
 import at.ac.uibk.swa.util.*;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.util.Pair;
@@ -18,7 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,6 +45,11 @@ public class TestRouteAuthentication {
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private PersonRepository personRepository;
+
+    @Value("${swa.token.expiration-duration:1h}")
+    private Duration tokenExpirationDuration;
 
     private String TEST_ANONYMOUS_ENDPOINT() {
         return "/testAnonymous";
@@ -136,88 +148,6 @@ public class TestRouteAuthentication {
                 status().isOk()
         );
     }
-    //endregion
-
-    //region Error Route Tests
-    /* TODO: This doesn't seem to work because it needs an injected Exception in the Endpoints
-    @Test
-    public void testErrorRoutesWithoutCredentials() {
-        // given: No created Persons
-
-        // when: accessing any Error Page with Credentials
-        testAllErrorRoutes(HttpHeaders.EMPTY);
-
-        // then: expect that the Page is returned.
-    }
-
-    @Test
-    public void testErrorRoutesWithInvalidCredentials() throws JsonProcessingException {
-        // given: A Person that isn't stored in the database
-        Person notSavedPerson = new Person("", "", "", UUID.randomUUID(), Set.of());
-
-        // when: accessing any Error Page with unknown Credentials
-        testAllErrorRoutes(new HttpHeaders(
-                generateHttpHeaders(Pair.of(
-                        HttpHeaders.AUTHORIZATION,
-                        AuthGenerator.generateToken(notSavedPerson)
-                ))
-        ));
-
-        // then: expect that the Page is returned.
-    }
-
-    @Test
-    public void testErrorRoutesWithCredentials() throws JsonProcessingException {
-        // given: A Person without Admin Permission
-        Person person = createUserWithToken(false);
-
-        // when: accessing any Error Page with unknown Credentials
-        testAllErrorRoutes(new HttpHeaders(
-                generateHttpHeaders(Pair.of(
-                        HttpHeaders.AUTHORIZATION,
-                        AuthGenerator.generateToken(person)
-                ))
-        ));
-
-        // then: expect that the Page is returned.
-    }
-
-    @Test
-    public void testErrorRoutesWithAdminCredentials() throws JsonProcessingException {
-        // given: A Person with Admin Permission
-        Person person = createUserWithToken(true);
-
-        // when: accessing any Error Page with unknown Credentials
-        testAllErrorRoutes(new HttpHeaders(
-                generateHttpHeaders(Pair.of(
-                        HttpHeaders.AUTHORIZATION,
-                        AuthGenerator.generateToken(person)
-                ))
-        ));
-
-        // then: expect that the Page is returned.
-    }
-
-    public void testAllErrorRoutes(HttpHeaders headers) {
-        // when: accessing any Error Page
-        for (String endpoint : TEST_ERROR_ENDPOINTS()) {
-            // when: using any HTTP Method
-            for (HttpMethod method : List.of(HttpMethod.GET, HttpMethod.PUT, HttpMethod.POST, HttpMethod.DELETE)) {
-                try {
-                    mockMvc.perform(MockMvcRequestBuilders.request(method, endpoint)
-                                    .headers(headers)
-                                    .contentType(MediaType.APPLICATION_JSON)
-                    ).andExpectAll(
-                            // then: Expect that the Page is returned
-                            status().isOk()
-                    );
-                } catch (Exception e) {
-                    assertFalse(true, String.format("Could not perform %s Request to ", method, endpoint));
-                }
-            }
-        }
-    }
-     */
     //endregion
 
     //region Api Route Tests
@@ -400,6 +330,50 @@ public class TestRouteAuthentication {
         ).andExpectAll(
                 status().isOk()
         );
+    }
+    //endregion
+
+    //region Test Token Expiration
+    private void setTokenCreationDate(Authenticable authenticable, LocalDateTime creationDate) throws NoSuchFieldException {
+        Field tokenCreationDateField = Authenticable.class.getDeclaredField("tokenCreationDate");
+        tokenCreationDateField.setAccessible(true);
+        ReflectionUtils.setField(tokenCreationDateField, authenticable, creationDate);
+    }
+
+    @Test
+    public void testNotExpiredToken() throws Exception {
+        // given: A Person created with a Token
+        Person person = createUserWithToken(true);
+
+        // when: Accessing a secured Page with the expired Token
+        mockMvc.perform(MockMvcRequestBuilders.get(TEST_API_ENDPOINT())
+                        .header(HttpHeaders.AUTHORIZATION, AuthGenerator.generateToken(person))
+                        .contentType(MediaType.APPLICATION_JSON)
+        // then: Expect an OK Response
+        ).andExpectAll(
+                status().isOk()
+        );
+
+    }
+
+    @Test
+    public void testExpiredToken() throws Exception {
+        // given: A Person created with a Token
+        Person person = createUserWithToken(true);
+
+        // given: Setting the Token Creation Date to be expired
+        setTokenCreationDate(person, LocalDateTime.now().minus(tokenExpirationDuration));
+        personRepository.updateToken(person);
+
+        // when: Accessing a secured Page with the expired Token
+        mockMvc.perform(MockMvcRequestBuilders.get(TEST_API_ENDPOINT())
+                        .header(HttpHeaders.AUTHORIZATION, AuthGenerator.generateToken(person))
+                        .contentType(MediaType.APPLICATION_JSON)
+        // then: Expect an Unauthorized Response
+        ).andExpectAll(
+                status().isUnauthorized()
+        );
+
     }
     //endregion
 }
