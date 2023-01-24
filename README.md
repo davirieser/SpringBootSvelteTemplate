@@ -1,11 +1,4 @@
-# Memory learning platform
-
-/*
-// TODO: Add Pipeline Badges
-| Main | Dev |
-| ---- | --- |
-|[![pipeline status](https://git.uibk.ac.at/informatik/qe/swapsws22/group6/g6t1/badges/main/pipeline.svg)](https://git.uibk.ac.at/informatik/qe/swapsws22/group6/g6t1/-/commits/main) | [![pipeline status](https://git.uibk.ac.at/informatik/qe/swapsws22/group6/g6t1/badges/dev/pipeline.svg)](https://git.uibk.ac.at/informatik/qe/swapsws22/group6/g6t1/commits/dev) |
-*/
+# Spring Boot + Svelte Template 
 
 # Description 
 
@@ -100,26 +93,6 @@ gradle bootRun
 cd swa
 mvn spring-boot:run
 ```
-
-## Continous development
-You can open 3 terminals or 3 pains in a terminal with following commands, so the server reload automatically on any change in the backend and front end code. 
-
-Als erstes
-```
-gradle assemble -t
-````
-Dann 
-```
-gradle bootRun
-```
-
-und 
-
-```
-npm run buildC
-```
-
-__don't forget these commands must be run simultaneously__
 
 # Contributing
 
