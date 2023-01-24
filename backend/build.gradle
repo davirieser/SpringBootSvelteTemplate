@@ -46,7 +46,6 @@ dependencies {
 	// Mail Service
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	compileOnly 'com.sun.mail:javax.mail:1.6.2'
-
 	
 
 // Test Dependencies
