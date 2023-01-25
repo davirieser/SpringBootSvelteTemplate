@@ -2,12 +2,6 @@
 swa:
   token:
     expiration-duration: 1d
-  admin:
-    base: /src/admin
-  api:
-    base: /api
-  error:
-    base: /error
 
 server:
   port: 3000
@@ -28,17 +22,25 @@ spring:
   profiles:
     active: 'prod'
   datasource:
-    driver-class-name: org.h2.Driver
-    url: 'jdbc:h2:mem:testdb'
+    driver-class-name: com.mysql.jdbc.Driver
+    url: 'db'
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
   h2:
     console:
       enabled: false
 
-  mvc:
-    static-path-pattern: '/**'
-
-  resources:
-    static-locations: 'classpath:/static/'
+  mail:
+    host: TODO
+    port: -1
+    username: TODO
+    password: TODO
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
