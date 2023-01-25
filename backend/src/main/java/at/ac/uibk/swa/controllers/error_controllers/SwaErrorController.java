@@ -79,13 +79,13 @@ public class SwaErrorController implements ErrorController {
             TokenExpiredException tokenExpiredException
     ) {
         if (endpointMatcherUtil.isApiRoute(request)) {
-        return TokenExpiredResponse.builder()
-                .exception(tokenExpiredException)
-                .statusCode(HttpStatus.UNAUTHORIZED)
-                .toEntity();
-    } else {
-        return generateRedirectFromException(401, tokenExpiredException).toEntity();
-    }
+            return TokenExpiredResponse.builder()
+                    .exception(tokenExpiredException)
+                    .statusCode(HttpStatus.UNAUTHORIZED)
+                    .toEntity();
+        } else {
+            return generateRedirectFromException(401, tokenExpiredException).toEntity();
+        }
     }
 
     @ResponseBody

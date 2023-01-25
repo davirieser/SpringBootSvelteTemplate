@@ -69,7 +69,7 @@ public class SecurityConfiguration {
     //region Custom Authentication Filter Beans
     @Bean
     AbstractAuthenticationProcessingFilter bearerAuthenticationFilter(HttpSecurity http) throws Exception {
-        final AbstractAuthenticationProcessingFilter filter = new HeaderTokenAuthenticationFilter(endpointMatcherUtil.getProtectedApiRoutes());
+        final AbstractAuthenticationProcessingFilter filter = new HeaderTokenAuthenticationFilter(endpointMatcherUtil.getProtectedApiRequestMatcher());
 
         filter.setAuthenticationManager(authManager(http));
         filter.setAuthenticationFailureHandler(failureHandler);
@@ -77,15 +77,17 @@ public class SecurityConfiguration {
         return filter;
     }
 
+    /* TODO: What happens to the Cookie Authentication Filter?
     @Bean
     AbstractAuthenticationProcessingFilter cookieAuthenticationFilter(HttpSecurity http) throws Exception {
-        final AbstractAuthenticationProcessingFilter filter = new CookieTokenAuthenticationFilter(endpointMatcherUtil.getAdminRoutes());
+        final AbstractAuthenticationProcessingFilter filter = new CookieTokenAuthenticationFilter(endpointMatcherUtil.getAdmin());
 
         filter.setAuthenticationManager(authManager(http));
         filter.setAuthenticationFailureHandler(failureHandler);
 
         return filter;
     }
+     */
     //endregion
 
     //region Filter Chain Bean
@@ -95,13 +97,17 @@ public class SecurityConfiguration {
                 // Register the custom AuthenticationProvider and AuthenticationFilter
                 .authenticationProvider(provider)
                 .addFilterBefore(bearerAuthenticationFilter(http), AnonymousAuthenticationFilter.class)
-                .addFilterBefore(cookieAuthenticationFilter(http), AnonymousAuthenticationFilter.class)
+                // .addFilterBefore(cookieAuthenticationFilter(http), AnonymousAuthenticationFilter.class)
                 // Specify which Routes/Endpoints should be protected and which ones should be accessible to everyone.
                 .authorizeHttpRequests(auth ->
                     auth
-                            // Only allow authenticated Users to use the API
-                            .requestMatchers(endpointMatcherUtil.getProtectedApiRoutes()).authenticated()
-                            .requestMatchers(endpointMatcherUtil.getAdminRoutes()).hasAuthority(Permission.ADMIN.toString())
+                            /*
+                            // Allow everybody to the Public API Routes
+                            .requestMatchers(endpointMatcherUtil.getPublicRouteRequestMatcher()).permitAll()
+                            // Only allow authenticated Users to use the Protected API
+                            .requestMatchers(endpointMatcherUtil.getProtectedApiRequestMatcher()).authenticated()
+                            .requestMatchers(endpointMatcherUtil.getAdminRouteRequestMatcher()).hasAuthority(Permission.ADMIN.toString())
+                            */
                             // Permit everyone to get the static resources
                             .requestMatchers(AnyRequestMatcher.INSTANCE).permitAll()
                 )
@@ -112,11 +118,6 @@ public class SecurityConfiguration {
                 .formLogin().disable()
                 .logout().disable()
         ;
-
-        // Make H2-Console available for testing
-        if (activeProfile.equals(StartupConfig.Profile.TEST)) {
-            http.headers().frameOptions().disable();
-        }
 
         // Register the custom Authentication Entry Point and Access Denied Handler.
         http.exceptionHandling()

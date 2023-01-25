@@ -2,6 +2,8 @@
 swa:
   token:
     expiration-duration: 1d
+  api:
+    base: /api
 
 server:
   port: 3000
