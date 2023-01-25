@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import static at.ac.uibk.swa.util.EndpointMatcherUtil.ErrorEndpoints.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 /**
  * Controller for sending Error Responses.
@@ -52,7 +53,7 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
-    @RequestMapping(AUTHENTICATION_ERROR_ENDPOINT)
+    @RequestMapping(value = AUTHENTICATION_ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public RestResponseEntity handleAuthenticationError(
             HttpServletRequest request,
@@ -70,7 +71,7 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
-    @RequestMapping(TOKEN_EXPIRED_ERROR_ENDPOINT)
+    @RequestMapping(value = TOKEN_EXPIRED_ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public RestResponseEntity handleTokenExpiredError(
             HttpServletRequest request,
@@ -88,7 +89,7 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
-    @RequestMapping(AUTHORIZATION_ERROR_ENDPOINT)
+    @RequestMapping(value = AUTHORIZATION_ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public RestResponseEntity handleAuthorizationError(
             HttpServletRequest request,
@@ -106,7 +107,7 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
-    @RequestMapping(NOT_FOUND_ERROR_ENDPOINT)
+    @RequestMapping(value = NOT_FOUND_ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public RestResponseEntity handleNotFoundError(
             HttpServletRequest request,
@@ -123,7 +124,7 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
-    @RequestMapping(ERROR_ENDPOINT)
+    @RequestMapping(value = ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponseEntity handleError(
             HttpServletRequest request,
