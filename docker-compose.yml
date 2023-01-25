@@ -7,7 +7,8 @@ services:
 
   sveltekit:
     build:
-      dockerfile: ./frontend/Dockerfile
+      context: ./frontend
+      dockerfile: ./Dockerfile
     depends_on:
       - spring
     networks:
@@ -18,7 +19,8 @@ services:
 
   spring:
     build:
-      dockerfile: ./backend/Dockerfile
+      dockerfile: ./Dockerfile
+      context: ./backend
     depends_on:
       - db
     ports:
