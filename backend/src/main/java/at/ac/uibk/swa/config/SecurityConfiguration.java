@@ -2,8 +2,11 @@ package at.ac.uibk.swa.config;
 
 import at.ac.uibk.swa.config.exception_handling.RestAccessDeniedHandler;
 import at.ac.uibk.swa.config.filters.HeaderTokenAuthenticationFilter;
+import at.ac.uibk.swa.models.annotations.PublicEndpoint;
 import at.ac.uibk.swa.util.EndpointMatcherUtil;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,9 +19,19 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.util.matcher.AnyRequestMatcher;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.pattern.PathPattern;
+
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Class for configuring the Authentication Process of the Web-Server.
@@ -54,6 +67,10 @@ public class SecurityConfiguration {
 
     @Autowired
     private StartupConfig.Profile activeProfile;
+
+    @Autowired
+    @Qualifier("requestMappingHandlerMapping")
+    private RequestMappingHandlerMapping handlerMapping;
     //endregion
 
     //region Authentication Manager Bean
@@ -67,42 +84,44 @@ public class SecurityConfiguration {
     //endregion
 
     //region Custom Authentication Filter Beans
-    @Bean
-    AbstractAuthenticationProcessingFilter bearerAuthenticationFilter(HttpSecurity http) throws Exception {
-        final AbstractAuthenticationProcessingFilter filter = new HeaderTokenAuthenticationFilter(endpointMatcherUtil.getProtectedApiRequestMatcher());
+    AbstractAuthenticationProcessingFilter bearerAuthenticationFilter(
+            HttpSecurity http, final RequestMatcher requiresAuth
+    ) throws Exception {
+        final AbstractAuthenticationProcessingFilter filter = new HeaderTokenAuthenticationFilter(requiresAuth);
 
         filter.setAuthenticationManager(authManager(http));
         filter.setAuthenticationFailureHandler(failureHandler);
 
         return filter;
     }
-
-    /* TODO: What happens to the Cookie Authentication Filter?
-    @Bean
-    AbstractAuthenticationProcessingFilter cookieAuthenticationFilter(HttpSecurity http) throws Exception {
-        final AbstractAuthenticationProcessingFilter filter = new CookieTokenAuthenticationFilter(endpointMatcherUtil.getAdmin());
-
-        filter.setAuthenticationManager(authManager(http));
-        filter.setAuthenticationFailureHandler(failureHandler);
-
-        return filter;
-    }
-     */
     //endregion
 
     //region Filter Chain Bean
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // Get all Mappings that have the PublicEndpoint Annotation
+        // NOTE: This is a workaround because Spring Security does not define an Annotation
+        //       that lets you exempt an Endpoint from the FilterChain
+        Map<RequestMappingInfo, HandlerMethod> methods = handlerMapping.getHandlerMethods();
+        RequestMatcher publicMappings = new OrRequestMatcher(methods.entrySet().stream()
+                .filter(h -> h.getValue().hasMethodAnnotation(PublicEndpoint.class))
+                .flatMap(h -> Stream.of(h.getKey()
+                        .getPathPatternsCondition()
+                        .getPatterns().stream()
+                        .map(PathPattern::getPatternString)
+                        .toArray(String[]::new)))
+                .map(AntPathRequestMatcher::new)
+                .toArray(RequestMatcher[]::new));
+        RequestMatcher protectedMappings = new NegatedRequestMatcher(publicMappings);
+
         http
                 // Register the custom AuthenticationProvider and AuthenticationFilter
                 .authenticationProvider(provider)
-                .addFilterBefore(bearerAuthenticationFilter(http), AnonymousAuthenticationFilter.class)
+                .addFilterBefore(bearerAuthenticationFilter(http, protectedMappings), AnonymousAuthenticationFilter.class)
 
-                // Require all Requests to be authenticated
-                .authorizeHttpRequests(auth ->
-                        auth
-                                .requestMatchers("/api/login", "/api/register").permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(auth -> auth
+                            .requestMatchers(publicMappings).permitAll()
+                            .requestMatchers(protectedMappings).authenticated()
                 )
 
                 // Disable CORS, CSRF as well as the default Web Security Login and Logout Pages.

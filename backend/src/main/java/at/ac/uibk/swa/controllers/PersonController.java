@@ -4,6 +4,7 @@ import at.ac.uibk.swa.models.Permission;
 import at.ac.uibk.swa.models.Person;
 import at.ac.uibk.swa.models.annotations.AnyPermission;
 import at.ac.uibk.swa.models.annotations.ApiRestController;
+import at.ac.uibk.swa.models.annotations.PublicEndpoint;
 import at.ac.uibk.swa.models.rest_responses.CreatedUserResponse;
 import at.ac.uibk.swa.models.rest_responses.ListResponse;
 import at.ac.uibk.swa.models.rest_responses.MessageResponse;
@@ -41,6 +42,7 @@ public class PersonController {
      * @param email The new Users email.
      * @return A RestResponse indicating whether the user could be created or not.
      */
+    @PublicEndpoint
     @PostMapping(REGISTER_ENDPOINT)
     public RestResponse register(
             @RequestParam("username") final String username,

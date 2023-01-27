@@ -2,6 +2,7 @@ package at.ac.uibk.swa.controllers;
 
 import at.ac.uibk.swa.models.Person;
 import at.ac.uibk.swa.models.annotations.ApiRestController;
+import at.ac.uibk.swa.models.annotations.PublicEndpoint;
 import at.ac.uibk.swa.models.rest_responses.AuthFailedResponse;
 import at.ac.uibk.swa.models.rest_responses.LoginResponse;
 import at.ac.uibk.swa.models.rest_responses.MessageResponse;
@@ -39,7 +40,8 @@ public class LoginController {
      * @return A Token if the user credentials are correct, otherwise an error.
      */
     @SneakyThrows
-    @PostMapping(LOGIN_ENDPOINT)
+    @PublicEndpoint
+    @PostMapping(value = LOGIN_ENDPOINT)
     public RestResponseEntity getToken(
             @RequestParam("username") final String username,
             @RequestParam("password") final String password
