@@ -60,14 +60,10 @@ public class SwaErrorController implements ErrorController {
             HttpServletResponse response,
             AuthenticationException accessDeniedException
     ) {
-        if (endpointMatcherUtil.isApiRoute(request)) {
-            return MessageResponse.builder()
-                    .message("Authentication failed!")
-                    .statusCode(HttpStatus.UNAUTHORIZED)
-                    .toEntity();
-        } else {
-            return generateRedirectFromException(401, accessDeniedException).toEntity();
-        }
+        return MessageResponse.builder()
+                .message("Authentication failed!")
+                .statusCode(HttpStatus.UNAUTHORIZED)
+                .toEntity();
     }
 
     @ResponseBody
@@ -78,14 +74,10 @@ public class SwaErrorController implements ErrorController {
             HttpServletResponse response,
             TokenExpiredException tokenExpiredException
     ) {
-        if (endpointMatcherUtil.isApiRoute(request)) {
-            return TokenExpiredResponse.builder()
-                    .exception(tokenExpiredException)
-                    .statusCode(HttpStatus.UNAUTHORIZED)
-                    .toEntity();
-        } else {
-            return generateRedirectFromException(401, tokenExpiredException).toEntity();
-        }
+        return TokenExpiredResponse.builder()
+                .exception(tokenExpiredException)
+                .statusCode(HttpStatus.UNAUTHORIZED)
+                .toEntity();
     }
 
     @ResponseBody
@@ -96,14 +88,10 @@ public class SwaErrorController implements ErrorController {
             HttpServletResponse response,
             AccessDeniedException accessDeniedException
     ) {
-        if (endpointMatcherUtil.isApiRoute(request)) {
-            return MessageResponse.builder()
-                .message("Insufficient Privileges!")
-                .statusCode(HttpStatus.FORBIDDEN)
-                .toEntity();
-        } else {
-            return generateRedirectFromException(403, accessDeniedException).toEntity();
-        }
+        return MessageResponse.builder()
+            .message("Insufficient Privileges!")
+            .statusCode(HttpStatus.FORBIDDEN)
+            .toEntity();
     }
 
     @ResponseBody
@@ -113,14 +101,10 @@ public class SwaErrorController implements ErrorController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        if (endpointMatcherUtil.isApiRoute(request)) {
-            return MessageResponse.builder()
-                .message("Endpoint not found!")
-                .statusCode(HttpStatus.NOT_FOUND)
-                .toEntity();
-        } else {
-            return generateRedirectFromException(404, new Exception()).toEntity();
-        }
+        return MessageResponse.builder()
+            .message("Endpoint not found!")
+            .statusCode(HttpStatus.NOT_FOUND)
+            .toEntity();
     }
 
     @ResponseBody
@@ -131,15 +115,11 @@ public class SwaErrorController implements ErrorController {
             HttpServletResponse response,
             Exception exception
     ) {
-        if (endpointMatcherUtil.isApiRoute(request)) {
-            return MessageResponse.builder()
-                .success(false)
-                .message("Internal Server Error!")
-                .statusCode(HttpStatus.UNAUTHORIZED)
-                .toEntity();
-        } else {
-            return generateRedirectFromException(501, exception).toEntity();
-        }
+        return MessageResponse.builder()
+            .success(false)
+            .message("Internal Server Error!")
+            .statusCode(HttpStatus.UNAUTHORIZED)
+            .toEntity();
     }
 
     public void handleErrorManual(
