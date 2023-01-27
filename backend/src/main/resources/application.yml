@@ -29,6 +29,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+  web:
+    resources:
+      add-mappings: false
   h2:
     console:
       enabled: false
