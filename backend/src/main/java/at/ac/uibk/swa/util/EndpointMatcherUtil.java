@@ -36,9 +36,9 @@ public class EndpointMatcherUtil {
     private final static String ADMIN_BASE_VALUE = "${swa.admin.base:/admin}";
     private final static String ERROR_BASE_VALUE = "${swa.error.base:/error}";
 
-    public final static String LOGIN_ENDPOINT = API_BASE_VALUE + "/login";
-    public final static String LOGOUT_ENDPOINT = API_BASE_VALUE + "/logout";
-    public final static String REGISTER_ENDPOINT = API_BASE_VALUE + "/register";
+    public final static String LOGIN_ENDPOINT = "/login";
+    public final static String LOGOUT_ENDPOINT = "/logout";
+    public final static String REGISTER_ENDPOINT = "/register";
 
     @Getter
     @Value(LOGIN_ENDPOINT)
@@ -90,7 +90,7 @@ public class EndpointMatcherUtil {
 
     public RequestMatcher getPublicRouteRequestMatcher() {
         return new OrRequestMatcher(
-                new AntPathRequestMatcher(this.apiLoginEndpoint),
+                new AntPathRequestMatcher("/api/login"),
                 // NOTE: DON'T ADD THE LOGOUT-ENDPOINT TO PUBLIC ROUTES.
                 //       THE LOGOUT IS DONE USING THE TOKEN FROM THE REQUEST.
                 // new AntPathRequestMatcher(this.apiLogoutEndpoint),
@@ -118,5 +118,13 @@ public class EndpointMatcherUtil {
     }
     public boolean isAdminRoute(HttpServletRequest request) {
         return this.getApiRouteRequestMatcher().matches(request);
+    }
+
+    public String toApiEndpoint(String route) {
+        return String.format("%s/%s", this.apiBaseRoute, route);
+    }
+
+    public String toAdminEndpoint(String route) {
+        return String.format("%s/%s", this.adminBaseRoute, route);
     }
 }

@@ -2,8 +2,6 @@ package at.ac.uibk.swa.config;
 
 import at.ac.uibk.swa.config.exception_handling.RestAccessDeniedHandler;
 import at.ac.uibk.swa.config.filters.HeaderTokenAuthenticationFilter;
-import at.ac.uibk.swa.config.filters.CookieTokenAuthenticationFilter;
-import at.ac.uibk.swa.models.Permission;
 import at.ac.uibk.swa.util.EndpointMatcherUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +17,8 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 /**
  * Class for configuring the Authentication Process of the Web-Server.
@@ -97,19 +97,12 @@ public class SecurityConfiguration {
                 // Register the custom AuthenticationProvider and AuthenticationFilter
                 .authenticationProvider(provider)
                 .addFilterBefore(bearerAuthenticationFilter(http), AnonymousAuthenticationFilter.class)
-                // .addFilterBefore(cookieAuthenticationFilter(http), AnonymousAuthenticationFilter.class)
-                // Specify which Routes/Endpoints should be protected and which ones should be accessible to everyone.
+
+                // Require all Requests to be authenticated
                 .authorizeHttpRequests(auth ->
-                    auth
-                            /*
-                            // Allow everybody to the Public API Routes
-                            .requestMatchers(endpointMatcherUtil.getPublicRouteRequestMatcher()).permitAll()
-                            // Only allow authenticated Users to use the Protected API
-                            .requestMatchers(endpointMatcherUtil.getProtectedApiRequestMatcher()).authenticated()
-                            .requestMatchers(endpointMatcherUtil.getAdminRouteRequestMatcher()).hasAuthority(Permission.ADMIN.toString())
-                            */
-                            // Permit everyone to get the static resources
-                            .requestMatchers(AnyRequestMatcher.INSTANCE).permitAll()
+                        auth
+                                .requestMatchers("/api/login", "/api/register").permitAll()
+                                .anyRequest().authenticated()
                 )
 
                 // Disable CORS, CSRF as well as the default Web Security Login and Logout Pages.
@@ -117,6 +110,8 @@ public class SecurityConfiguration {
                 .cors().disable()
                 .formLogin().disable()
                 .logout().disable()
+                // Disable Anonymous Users from connecting
+                .anonymous().disable()
         ;
 
         // Register the custom Authentication Entry Point and Access Denied Handler.
@@ -129,3 +124,4 @@ public class SecurityConfiguration {
     }
     //endregion
 }
+
