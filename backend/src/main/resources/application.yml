@@ -6,7 +6,7 @@ swa:
     base: /api
 
 server:
-  port: 3000
+  port: 8080
   servlet:
     context-path: /
 
@@ -15,6 +15,7 @@ logging:
     web: INFO
 
 springdoc:
+  # Disable Swagger in Production
   api-docs:
     enabled: false
   swagger-ui:
@@ -24,17 +25,18 @@ spring:
   profiles:
     active: 'prod'
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: 'db'
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://db:3306/swa
+    username: spring
+    password: password
   jpa:
     hibernate:
-      ddl-auto: none
+      # Create Model Tables on Startup
+      ddl-auto: create
   web:
     resources:
+      # Disable static Resource Mapping
       add-mappings: false
-  h2:
-    console:
-      enabled: false
 
   mail:
     host: TODO

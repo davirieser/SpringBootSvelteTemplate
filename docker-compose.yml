@@ -23,8 +23,11 @@ services:
       context: ./backend
     depends_on:
       - db
+    links:
+      - db
+      - db:database
     ports:
-      - "8443:8443"
+      - "8443:8080"
     expose: [8443]
     networks:
       - api-network
@@ -35,9 +38,10 @@ services:
     image: mysql
     restart: always
     environment:
-      # MYSQL_ROOT_PASSWORD: passwd
-      # MYSQL_DATABASE: swa
+      MYSQL_DATABASE: swa
       MYSQL_RANDOM_ROOT_PASSWORD: yes
+      MYSQL_USER: spring
+      MYSQL_PASSWORD: password
     # TODO: Expose Port if "DEBUG"-Profile is enabled?
     # ports:
     #   - ""
@@ -46,7 +50,7 @@ services:
     # TODO: How do we enable Caching Sha2-Passwords? Is this enough?
     # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
     # (this is just an example, not intended to be a production configuration)
-    # command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password
 
   adminer:
     image: adminer
