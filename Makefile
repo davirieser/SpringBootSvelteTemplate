@@ -9,13 +9,14 @@ all: spring sveltekit
 
 spring:
 	@ echo "Rebuilding Spring Executable"
-	cd backend && gradle assemble
+	- cd backend && gradle assemble
 	@ echo "Rebuilding Spring Container"
 	$(PREFIX) $(DOCKER_COMPOSE) build --no-cache spring
 
 sveltekit:
+	$(PREFIX) $(DOCKER_COMPOSE) build sveltekit --no-cache 
 	@ echo "Rebuilding SvelteKit Container"
-	$(PREFIX )
+	$(PREFIX)
 
 .PHONY: clean
 clean:
