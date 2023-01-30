@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 # Registers the Git Hooks provided with the Repository.
 
 ALL_MATCHER=/*

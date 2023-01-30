@@ -3,7 +3,7 @@
 
 echo "Running Pre-Commit Hook"
 
-BACKEND_DIR=backend/
+BACKEND_DIR=backend
 BACKEND_TEST_CMD="gradle test"
 
 TRUE=0
