@@ -1,7 +1,9 @@
-#!/usr/bin/bash
+#!/bin/bash
 # Run all tests before commiting
 
-BACKEND_DIR=swa
+echo "Running Pre-Commit Hook"
+
+BACKEND_DIR=backend/
 BACKEND_TEST_CMD="gradle test"
 
 TRUE=0
