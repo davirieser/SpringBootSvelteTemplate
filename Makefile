@@ -2,22 +2,32 @@
 PREFIX=sudo
 DOCKER_COMPOSE=docker compose
 
-all_in_dir = $(shell find $(1) -type d) $(shell find $(1) -type f -name '*')
+INSTALL_SCRIPT=install.sh
 
-all: spring sveltekit
-	$(PREFIX) $(DOCKER_COMPOSE) up
+all: install spring sveltekit
+	@- $(PREFIX) $(DOCKER_COMPOSE) up
+
+push:
+	@ git push --recurse-submodules=on-demand
+
+pull:
+	@- git pull
+	@- git submodule update --remote
+
+install:
+	@- git submodule update --init --recursive
+	@- ./$(INSTALL_SCRIPT)
 
 spring:
 	@ echo "Rebuilding Spring Executable"
-	- cd backend && gradle assemble
+	@- cd backend && gradle assemble
 	@ echo "Rebuilding Spring Container"
-	$(PREFIX) $(DOCKER_COMPOSE) build --no-cache spring
+	@ $(PREFIX) $(DOCKER_COMPOSE) build --no-cache spring
 
 sveltekit:
-	$(PREFIX) $(DOCKER_COMPOSE) build sveltekit --no-cache 
+	@ $(PREFIX) $(DOCKER_COMPOSE) build sveltekit --no-cache
 	@ echo "Rebuilding SvelteKit Container"
-	$(PREFIX)
 
 .PHONY: clean
 clean:
-	$(PREFIX) $(DOCKER_COMPOSE) down -v
+	@ $(PREFIX) $(DOCKER_COMPOSE) down -v
