@@ -52,15 +52,16 @@ dependencies {
 
 	// Spring Actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	
+
+	// In Memory Database (for Debugging and Testing)
+	implementation 'com.h2database:h2'
+
 
 // Test Dependencies
 
 	// Test Framework
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-	// Test (in-memory) Database
-	testImplementation 'com.h2database:h2'
 
 	// Spring Dev Tools
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
