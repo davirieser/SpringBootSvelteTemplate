@@ -1,6 +1,7 @@
 package at.ac.uibk.swa.controllers.error_controllers;
 
 import at.ac.uibk.swa.models.annotations.ApiRestController;
+import at.ac.uibk.swa.models.annotations.PublicEndpoint;
 import at.ac.uibk.swa.models.exceptions.TokenExpiredException;
 import at.ac.uibk.swa.models.rest_responses.MessageResponse;
 import at.ac.uibk.swa.models.rest_responses.RedirectResponse;
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -53,6 +55,8 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
+    @ReadOperation
+    @PublicEndpoint
     @RequestMapping(value = AUTHENTICATION_ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public RestResponseEntity handleAuthenticationError(
@@ -67,6 +71,8 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
+    @ReadOperation
+    @PublicEndpoint
     @RequestMapping(value = TOKEN_EXPIRED_ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public RestResponseEntity handleTokenExpiredError(
@@ -81,6 +87,8 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
+    @ReadOperation
+    @PublicEndpoint
     @RequestMapping(value = AUTHORIZATION_ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public RestResponseEntity handleAuthorizationError(
@@ -95,6 +103,8 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
+    @ReadOperation
+    @PublicEndpoint
     @RequestMapping(value = NOT_FOUND_ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public RestResponseEntity handleNotFoundError(
@@ -108,6 +118,8 @@ public class SwaErrorController implements ErrorController {
     }
 
     @ResponseBody
+    @ReadOperation
+    @PublicEndpoint
     @RequestMapping(value = ERROR_ENDPOINT, method = {GET, POST, PUT, PATCH, DELETE})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public RestResponseEntity handleError(

@@ -10,6 +10,8 @@ import at.ac.uibk.swa.models.rest_responses.RestResponseEntity;
 import at.ac.uibk.swa.service.PersonService;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +42,7 @@ public class LoginController {
      * @return A Token if the user credentials are correct, otherwise an error.
      */
     @SneakyThrows
+    @ReadOperation
     @PublicEndpoint
     @PostMapping(value = LOGIN_ENDPOINT)
     public RestResponseEntity getToken(
@@ -67,6 +70,7 @@ public class LoginController {
      *
      * @return A Message saying whether the Logout was successful or not.
      */
+    @DeleteOperation
     @PostMapping(LOGOUT_ENDPOINT)
     public RestResponseEntity deleteToken() {
         if (!personService.logout()) {
