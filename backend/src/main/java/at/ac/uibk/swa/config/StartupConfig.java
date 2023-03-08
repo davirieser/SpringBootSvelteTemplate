@@ -49,7 +49,7 @@ public class StartupConfig {
     public void createBaseAdminUser() {
         Profile activeProfile = getActiveProfile();
         switch (activeProfile) {
-            case DEV -> {
+            case DEBUG -> {
                 String unhashedPassword = "password";
                 Person person = new Person(
                         "Admin", "admin@noreply.com", unhashedPassword,
@@ -70,7 +70,7 @@ public class StartupConfig {
      * Helper Class for easier Handling of the possible Profiles.
      */
     public enum Profile {
-        DEV,
+        DEBUG,
         PROD,
         TEST,
         OTHER;
