@@ -6,6 +6,7 @@ import at.ac.uibk.swa.models.annotations.PublicEndpoint;
 import at.ac.uibk.swa.util.EndpointMatcherUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -87,7 +88,7 @@ public class SecurityConfiguration {
     }
     //endregion
 
-    //region Endpoint Matchers
+    //region PublicEndpoint Matchers
     private RequestMatcher getPublicEndpointMatcher() {
         return new OrRequestMatcher(getPublicEndpointStream().toArray(RequestMatcher[]::new));
     }
@@ -113,10 +114,12 @@ public class SecurityConfiguration {
                 // Ensure that no one accidentally unlocks multiple Endpoints at once
                 .filter(p -> !p.endsWith("*"));
     }
+    //endregion
 
+    //region Actuator Endpoint Matchers
     private RequestMatcher getActuatorEndpointMatcher() {
         // Enable the Actuator Endpoints in the Development Environment
-        if (this.profile == StartupConfig.Profile.DEV) {
+        if (this.profile == StartupConfig.Profile.DEBUG) {
             return new OrRequestMatcher(getActuatorEndpointStream().toArray(RequestMatcher[]::new));
         } else {
             // NOTE: Creating an OrRequest using no Values results in a Runtime Error
@@ -131,8 +134,40 @@ public class SecurityConfiguration {
 
     private Stream<String> getActuatorEndpointStrings() {
         // Enable the Actuator Endpoints in the Development Environment
-        if (this.profile == StartupConfig.Profile.DEV) {
+        if (this.profile == StartupConfig.Profile.DEBUG) {
             return Stream.of("/actuator/**");
+        } else {
+            return Stream.of();
+        }
+    }
+    //endregion
+
+    //region Swagger Endpoint Matchers
+    @Value("${springdoc.api-docs.path}")
+    private String swaggerDocPath;
+
+    @Value("${springdoc.swagger-ui.path}")
+    private String swaggerApiPath;
+
+    private RequestMatcher getSwaggerEndpointMatcher() {
+        // Enable the Swagger Endpoints in the Development Environment
+        if (this.profile == StartupConfig.Profile.DEBUG) {
+            return new OrRequestMatcher(getSwaggerEndpointStream().toArray(RequestMatcher[]::new));
+        } else {
+            // NOTE: Creating an OrRequest using no Values results in a Runtime Error
+            //       WORKAROUND: Create a negated AnyRequestMatcher
+            return new NegatedRequestMatcher(AnyRequestMatcher.INSTANCE);
+        }
+    }
+
+    private Stream<RequestMatcher> getSwaggerEndpointStream() {
+        return getSwaggerEndpointStrings().map(AntPathRequestMatcher::new);
+    }
+
+    private Stream<String> getSwaggerEndpointStrings() {
+        // Enable the Swagger Endpoints in the Development Environment
+        if (this.profile == StartupConfig.Profile.DEBUG) {
+            return Stream.of(swaggerDocPath, swaggerApiPath, "/swagger-ui/index.html");
         } else {
             return Stream.of();
         }
@@ -142,7 +177,11 @@ public class SecurityConfiguration {
     //region Filter Chain Bean
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        RequestMatcher publicMappings = new OrRequestMatcher(getActuatorEndpointMatcher(), getPublicEndpointMatcher());
+        RequestMatcher publicMappings = new OrRequestMatcher(
+                getActuatorEndpointMatcher(),
+                getPublicEndpointMatcher(),
+                getSwaggerEndpointMatcher()
+        );
         RequestMatcher protectedMappings = new NegatedRequestMatcher(publicMappings);
 
         http
