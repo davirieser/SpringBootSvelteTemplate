@@ -1,0 +1,31 @@
+
+logging:
+  level:
+    web: TRACE
+
+springdoc:
+  # API-Docs is an Endpoint where the Swagger-UI
+  # gets the information about the Endpoints.
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+
+spring:
+  datasource:
+    # Use an in-memory Database for testing
+    driver-class-name: org.h2.Driver
+    url: 'jdbc:h2:mem:testdb'
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        # ----- Enable the following two options to see the SQL on the CMD-Line (beware Indentation!!) ----- #
+        # format_sql: true
+    # show-sql: true
+# -------------------------------------------------------------------------------------------------- #

@@ -17,8 +17,10 @@ logging:
 springdoc:
   # Disable Swagger in Production
   api-docs:
+    path: /api-docs
     enabled: false
   swagger-ui:
+    path: /swagger
     enabled: false
 
 spring:
